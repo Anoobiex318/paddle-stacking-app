@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Matchpoint Palawan Paddle Stacking Admin Mode</title>
+
+  <!-- App manifest & icon -->
+  <link rel="icon" type="image/x-icon" href="/assets/icons/favicon.ico">
+  <link rel="manifest" href="manifest.json" />
+
+  <!-- Fonts & Styles -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- JS -->
+  <script defer src="script.js"></script>
+</head>
+<body>
+
+  <!-- ===== Header ===== -->
+  <header class="app-header">
+    <img src="assets/icons/logo.png" alt="Logo" class="app-logo">
+    <h1>Matchpoint Palawan Paddle Stacking Admin Mode</h1>
+  </header>
+
+  <!-- ===== Main Content ===== -->
+  <main>
+    <!-- Add Player Section -->
+    <section id="add-player">
+      <div class="panel-header">
+        <h2>Add Player</h2>
+        <button id="openDashboard" class="btn btn-secondary" title="Click to View Queue Dashboard">📊</button>
+      </div>
+      <form id="playerForm">
+        <input type="text" id="playerName" placeholder="Enter Name" required />
+        <select id="playerRank" required>
+          <option value="">Select Category</option>
+          <option value="Beginner">Beginner</option>
+          <option value="Intermediate">Intermediate</option>
+        </select>
+        <button type="submit">Add to Queue</button>
+      </form>
+    </section>
+
+    <!-- Queue & Courts Grid -->
+    <div class="dashboard-grid">
+      <!-- Players Queue -->
+      <section id="queue-section">
+          <div class="panel-header">
+      <span class="panel-icon">🎯</span>
+        <h2>Players Queue</h2>
+
+        <input type="text" id="queueSearch" placeholder="Search player..." class="queue-search">
+      </div>
+
+        <ul id="playerQueue" class="queue-list"></ul>
+      </section>
+
+      <!-- Active Courts -->
+      <section id="courts">
+        <div class="panel-header">
+          <h2>Active Courts</h2>
+        </div>
+        <div class="court-grid">
+          <div class="court" id="court1">
+            <div class="court-header">Court #1</div>
+            <ul class="court-list">
+              <p class="empty-state">Waiting for players</p>
+            </ul>
+            <button class="finish-btn" onclick="finishGame(1)">Finish Game</button>
+          </div>
+          <div class="court" id="court2">
+            <div class="court-header">Court #2</div>
+            <ul class="court-list">
+              <p class="empty-state">Waiting for players</p>
+            </ul>
+            <button class="finish-btn" onclick="finishGame(2)">Finish Game</button>
+          </div>
+          <div class="court" id="court3">
+            <div class="court-header">Court #3</div>
+            <ul class="court-list">
+              <p class="empty-state">Waiting for players</p>
+            </ul>
+            <button class="finish-btn" onclick="finishGame(3)">Finish Game</button>
+          </div>
+          <div class="court" id="court4">
+            <div class="court-header">Court #4</div>
+            <ul class="court-list">
+              <p class="empty-state">Waiting for players</p>
+            </ul>
+            <button class="finish-btn" onclick="finishGame(4)">Finish Game</button>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- ===== Footer ===== -->
+<footer>
+  <button id="dealBtn" class="btn btn-openplay">🎲 Roll Openplay</button>
+  <button id="dealIntermediateBtn" class="btn">🎲 Roll Intermediate Play</button>
+  <button id="resetBtn" class="danger">♻️ Reset List</button>
+</footer>
+
+
+  <!-- ===== Reset Confirmation Modal ===== -->
+  <div id="resetModal" class="modal">
+    <div class="modal-content">
+      <h3>Reset Players?</h3>
+      <p>This will clear all players and courts. This action cannot be undone.</p>
+      <div class="modal-actions">
+        <button id="cancelReset">Cancel</button>
+        <button id="confirmReset" class="danger">Yes, Reset</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Remove Player Modal ===== -->
+  <div id="removeModal" class="modal">
+    <div class="modal-content">
+      <h3>Remove Player</h3>
+      <p>Are you sure you want to remove this player?</p>
+      <div class="modal-actions">
+        <button id="cancelRemove" class="cancel-btn">Cancel</button>
+        <button id="confirmRemove" class="confirm-btn danger">Remove</button>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

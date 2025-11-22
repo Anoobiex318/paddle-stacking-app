@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Queue Dashboard - Matchpoint Palawan Paddle Stacker</title>
+  <link rel="icon" type="image/x-icon" href="/assets/icons/favicon.ico">
+  <link rel="manifest" href="manifest.json" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="dashboard.css" />
+    <!-- JS -->
+  <script defer src="dashboard.js"></script>
+</head>
+<body>
+  <!-- HEADER -->
+  <header class="app-header fixed">
+    <img src="assets/icons/logo.png" alt="Logo" class="app-logo">
+    <h1>Matchpoint Palawan Paddle Stacking Queue</h1>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <main>
+    <marquee><div class="marquee">Live view of player queues and ongoing matches...</div></marquee>
+
+    <div class="dashboard-grid">
+      <!-- Queue Panel -->
+      <section>
+        <div class="panel-header">
+          <span class="panel-icon">🎯</span>
+          <h2>Players Queue</h2>
+        </div>
+        <ul id="queueList" class="queue-list"></ul>
+      </section>
+
+      <!-- Courts Panel -->
+      <section>
+        <div class="panel-header">
+          <h2>Active Courts</h2>
+        </div>
+        <div id="courtsContainer" class="court-grid"></div>
+      </section>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+<footer class="fixed-footer">
+  <a href="index.html" title="Back to Admin Dashboard">🏠</a>
+  <span id="footer-text">
+    © <span id="currentYear"></span> Matchpoint Palawan • 
+    <span id="currentDate"></span> • 
+    <span id="clock" class="pulse-clock"></span>
+  </span>
+</footer>
+</body>
+</html>
