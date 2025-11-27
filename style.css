@@ -441,7 +441,7 @@ footer .btn:hover {
 }
 
 footer .btn-secondary {
-  background: #fff;
+  background: #ffffff;
   color: var(--primary);
   border: 1px solid var(--primary);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);

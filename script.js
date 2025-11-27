@@ -144,7 +144,7 @@ function renderQueue() {
         <span class="queue-number">${i + 1}.</span>
         <span class="queue-name">${escapeHtml(p.name)}</span>
         <span class="rank-badge ${p.rank.toLowerCase()}">${escapeHtml(p.rank)}</span>
-        <span class="play-count" style="font-size:0.85rem; margin-left:8px; opacity:0.9;">Games: ${p.playCount || 0}</span>
+        <span class="play-count" style="font-size:0.85rem; margin-left:8px; opacity:0.9;">Games Played: ${p.playCount || 0}</span>
       </div>
       <button class="remove-btn" onclick="openRemoveModal(${queue.indexOf(p)})" title="Delete or Remove Player">❌</button>
     `;

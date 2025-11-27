@@ -35,7 +35,7 @@ function renderDashboard() {
         </div>
         <div style="display:flex;align-items:center;">
           <span class="rank-badge ${p.rank.toLowerCase()}">${p.rank}</span>
-          <span class="play-count" style="font-size:0.85rem; margin-left:8px; opacity:0.9;">Games: ${p.playCount || 0}</span>
+          <!-- <span class="play-count" style="font-size:0.85rem; margin-left:8px; opacity:0.9;">Games: ${p.playCount || 0}</span> -->
         </div>
       `;
       queueList.appendChild(li);
