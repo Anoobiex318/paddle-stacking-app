@@ -15,7 +15,7 @@ const removeModal = document.getElementById("removeModal");
 const cancelRemove = document.getElementById("cancelRemove");
 const confirmRemove = document.getElementById("confirmRemove");
 const resetBtn = document.getElementById("resetBtn");
-
+const openAdvanceBtn = document.getElementById("openAdvanceBtn");
 // control persistence across reloads
 const persistAcrossReloads = true;
 const STORAGE_QUEUE = "pickleballQueue_v3";
@@ -108,6 +108,32 @@ function showModal(title, message) {
 function renderQueue() {
   const searchValue = document.getElementById("queueSearch")?.value?.toLowerCase() || "";
 
+  // --- NEW: update category counts box (static, includes courts) ---
+  const playerCountBox = document.querySelector(".playerCount");
+  if (playerCountBox) {
+
+    // Merge queue + players in courts into one array
+    const allPlayers = [
+      ...queue,
+      ...courts[0],
+      ...courts[1],
+      ...courts[2],
+      ...courts[3]
+    ];
+
+    const total = allPlayers.length;
+    const beginners = allPlayers.filter(p => p.rank === "Beginner").length;
+    const intermediates = allPlayers.filter(p => p.rank === "Intermediate").length;
+
+    playerCountBox.innerHTML = `
+    <span class="count-pill total">Total Players: ${total}</span>
+    <span class="count-pill beginner">Beginner: ${beginners}</span>
+    <span class="count-pill intermediate">Intermediate: ${intermediates}</span>
+  `;
+  }
+
+  // --- END NEW ---
+
   playerQueue.innerHTML = "";
 
   // CASE 1: Queue itself is empty (no players at all)
@@ -144,13 +170,12 @@ function renderQueue() {
         <span class="queue-number">${i + 1}.</span>
         <span class="queue-name">${escapeHtml(p.name)}</span>
         <span class="rank-badge ${p.rank.toLowerCase()}">${escapeHtml(p.rank)}</span>
-        <span class="play-count" style="font-size:0.85rem; margin-left:8px; opacity:0.9;">Games Played: ${p.playCount || 0}</span>
+        <span class="play-count">Played: ${p.playCount || 0}</span>
       </div>
       <button class="remove-btn" onclick="openRemoveModal(${queue.indexOf(p)})" title="Delete or Remove Player">❌</button>
     `;
     playerQueue.appendChild(li);
 
-    // Optional animation stagger
     setTimeout(() => animateListItem(li), 70 * i);
   });
 }
@@ -487,7 +512,11 @@ importInput.addEventListener("change", (e) => {
   };
   reader.readAsText(file);
 });
-
+openAdvanceBtn.addEventListener("click", () => {
+  document.querySelectorAll(".adv-btn").forEach(btn => {
+    btn.style.display = btn.style.display === "none" ? "flex" : "none";
+  });
+});
 
 
 /* ---------- Init ---------- */

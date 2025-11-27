@@ -41,6 +41,32 @@ function renderDashboard() {
       queueList.appendChild(li);
     });
   }
+  // --- NEW: update category counts box ---
+  const playerCountBox = document.querySelector(".playerCount");
+  if (playerCountBox) {
+    // Count ALL players (queue + courts)
+    let allPlayers = [...queue];
+    courts.forEach(c => c.forEach(p => allPlayers.push(p)));
+
+    const total = allPlayers.length;
+    const beginners = allPlayers.filter(p => p.rank === "Beginner").length;
+    const intermediates = allPlayers.filter(p => p.rank === "Intermediate").length;
+
+    playerCountBox.innerHTML = `
+    <div class="playerCount-card total">
+      <h3>Total Players</h3>
+      <span>${total}</span>
+    </div>
+    <div class="playerCount-card beginner">
+      <h3>Beginner</h3>
+      <span>${beginners}</span>
+    </div>
+    <div class="playerCount-card intermediate">
+      <h3>Intermediate</h3>
+      <span>${intermediates}</span>
+    </div>
+  `;
+  }
 
   /* ==========================================================
      COURTS DISPLAY + ANIMATIONS

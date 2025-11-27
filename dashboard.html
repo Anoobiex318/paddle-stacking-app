@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -9,9 +10,10 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
   <link rel="stylesheet" href="dashboard.css" />
-    <!-- JS -->
+  <!-- JS -->
   <script defer src="dashboard.js"></script>
 </head>
+
 <body>
   <!-- HEADER -->
   <header class="app-header fixed">
@@ -21,7 +23,9 @@
 
   <!-- MAIN CONTENT -->
   <main>
-    <marquee><div class="marquee">Live view of player queues and ongoing matches...</div></marquee>
+    <marquee>
+      <div class="marquee">Live view of player queues and ongoing matches...</div>
+    </marquee>
 
     <div class="dashboard-grid">
       <!-- Queue Panel -->
@@ -41,16 +45,18 @@
         <div id="courtsContainer" class="court-grid"></div>
       </section>
     </div>
+    <div class="playerCount playerCount-dashboard"></div>
   </main>
 
   <!-- FOOTER -->
-<footer class="fixed-footer">
-  <a href="index.html" title="Back to Admin Dashboard">🏠</a>
-  <span id="footer-text">
-    © <span id="currentYear"></span> Matchpoint Palawan • 
-    <span id="currentDate"></span> • 
-    <span id="clock" class="pulse-clock"></span>
-  </span>
-</footer>
+  <footer class="fixed-footer">
+    <a href="index.html" title="Back to Admin Dashboard">🏠</a>
+    <span id="footer-text">
+      © <span id="currentYear"></span> Matchpoint Palawan •
+      <span id="currentDate"></span> •
+      <span id="clock" class="pulse-clock"></span>
+    </span>
+  </footer>
 </body>
+
 </html>
