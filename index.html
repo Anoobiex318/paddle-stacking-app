@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -16,6 +17,7 @@
   <!-- JS -->
   <script defer src="script.js"></script>
 </head>
+
 <body>
 
   <!-- ===== Header ===== -->
@@ -47,12 +49,12 @@
     <div class="dashboard-grid">
       <!-- Players Queue -->
       <section id="queue-section">
-          <div class="panel-header">
-      <span class="panel-icon">🎯</span>
-        <h2>Players Queue</h2>
+        <div class="panel-header">
+          <span class="panel-icon">🎯</span>
+          <h2>Players Queue</h2>
 
-        <input type="text" id="queueSearch" placeholder="Search player..." class="queue-search">
-      </div>
+          <input type="text" id="queueSearch" placeholder="Search player..." class="queue-search">
+        </div>
 
         <ul id="playerQueue" class="queue-list"></ul>
       </section>
@@ -96,18 +98,21 @@
     </div>
   </main>
 
-  <!-- ===== Footer ===== -->
-<footer>
-  <button id="dealBtn" class="btn btn-openplay">🎲 Roll Openplay</button>
-  <button id="dealIntermediateBtn" class="btn">🎲 Roll Intermediate Play</button>
-  <button id="resetBtn" class="danger">♻️ Reset List</button>
-</footer>
+  <!-- ===== Footer Controls ===== -->
+  <footer
+    style="position: fixed; bottom: 0; left: 0; width: 100%; background: white; padding: 12px; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); display: flex; justify-content: center; gap: 10px; z-index: 1000; flex-wrap: wrap;">
+    <button id="dealBtn" class="btn">🎲 Deal Players</button>
+    <button id="dealIntermediateBtn" class="btn btn-secondary">⚡ Deal Intermediate</button>
+    <button id="exportBtn" class="btn btn-secondary">📤 Export CSV</button>
+    <button id="importBtn" class="btn btn-secondary">📥 Import CSV</button>
+    <input type="file" id="importInput" accept=".csv" style="display: none;" />
+    <button id="resetBtn" class="btn danger">🗑️ Reset All</button>
+  </footer>
 
-
-  <!-- ===== Reset Confirmation Modal ===== -->
+  <!-- ===== Reset Modal ===== -->
   <div id="resetModal" class="modal">
     <div class="modal-content">
-      <h3>Reset Players?</h3>
+      <h3>Reset All Data</h3>
       <p>This will clear all players and courts. This action cannot be undone.</p>
       <div class="modal-actions">
         <button id="cancelReset">Cancel</button>
@@ -127,5 +132,7 @@
       </div>
     </div>
   </div>
+
 </body>
+
 </html>
