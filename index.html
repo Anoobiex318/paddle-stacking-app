@@ -23,7 +23,7 @@
   <!-- ===== Header ===== -->
   <header class="app-header">
     <img src="assets/icons/logo.png" alt="Logo" class="app-logo">
-    <h1>Matchpoint Palawan Paddle Stacking Admin Mode</h1>
+    <h1>Matchpoint Palawan Paddle Stacking - Admin Mode v2.0</h1>
   </header>
 
   <!-- ===== Main Content ===== -->
@@ -32,8 +32,10 @@
     <section id="add-player">
       <div class="panel-header">
         <h2>Add Player</h2>
-        <button id="openDashboard" class="btn btn-secondary" title="Click to View Queue Dashboard">📺</button>
-        <button id="openAdvanceBtn" class="btn btn-secondary">⚙️</button>
+        <button id="openDashboard" class="btn btn-secondary" title="Click to View Queue Dashboard"><img
+            src="assets/icons/dashboard.png" alt="Dashboard"></button>
+        <button id="openAdvanceBtn" class="btn btn-secondary" title="Click to View Advance Settings"><img
+            src="assets/icons/cogwheel.png" alt="Settings"></button>
       </div>
       <form id="playerForm">
         <input type="text" id="playerName" placeholder="Enter Name" required />
@@ -42,7 +44,7 @@
           <option value="Beginner">Beginner</option>
           <option value="Intermediate">Intermediate</option>
         </select>
-        <button type="submit">Add to Queue</button>
+        <button class="btn" type="submit"><span><img src="assets/icons/add.png" alt="Add"></span>Add to Queue</button>
       </form>
     </section>
 
@@ -51,9 +53,8 @@
       <!-- Players Queue -->
       <section id="queue-section">
         <div class="panel-header">
-          <span class="panel-icon">🎯</span>
+          <span class="panel-icon"><img src="assets/icons/game.png" alt="Players"></span>
           <h2>Players Queue</h2>
-
           <input type="text" id="queueSearch" placeholder="Search player..." class="queue-search">
         </div>
 
@@ -64,6 +65,7 @@
       <!-- Active Courts -->
       <section id="courts">
         <div class="panel-header">
+          <span class="panel-icon"><img src="assets/icons/pickleball.png" alt="Court"></span>
           <h2>Active Courts</h2>
         </div>
         <div class="court-grid">
@@ -72,28 +74,32 @@
             <ul class="court-list">
               <p class="empty-state">Waiting for players</p>
             </ul>
-            <button class="finish-btn" onclick="finishGame(1)">Finish Game</button>
+            <button class="finish-btn" onclick="finishGame(1)" title="Click to Finish Game and Queue Next Player">Finish
+              Game</button>
           </div>
           <div class="court" id="court2">
             <div class="court-header">Court #2</div>
             <ul class="court-list">
               <p class="empty-state">Waiting for players</p>
             </ul>
-            <button class="finish-btn" onclick="finishGame(2)">Finish Game</button>
+            <button class="finish-btn" onclick="finishGame(2)" title="Click to Finish Game and Queue Next Player">Finish
+              Game</button>
           </div>
           <div class="court" id="court3">
             <div class="court-header">Court #3</div>
             <ul class="court-list">
               <p class="empty-state">Waiting for players</p>
             </ul>
-            <button class="finish-btn" onclick="finishGame(3)">Finish Game</button>
+            <button class="finish-btn" onclick="finishGame(3)" title="Click to Finish Game and Queue Next Player">Finish
+              Game</button>
           </div>
           <div class="court" id="court4">
             <div class="court-header">Court #4</div>
             <ul class="court-list">
               <p class="empty-state">Waiting for players</p>
             </ul>
-            <button class="finish-btn" onclick="finishGame(4)">Finish Game</button>
+            <button class="finish-btn" onclick="finishGame(4)" title="Click to Finish Game and Queue Next Player">Finish
+              Game</button>
           </div>
         </div>
       </section>
@@ -103,12 +109,16 @@
   <!-- ===== Footer Controls ===== -->
   <footer
     style="position: fixed; bottom: 0; left: 0; width: 100%; background: white; padding: 12px; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); display: flex; justify-content: center; gap: 10px; z-index: 1000; flex-wrap: wrap;">
-    <button id="dealBtn" class="btn">🎲 Roll Openplay</button>
-    <button id="dealIntermediateBtn" class="btn btn-secondary">⚡ Roll Intermediate Play</button>
-    <button id="exportBtn" class="btn adv-btn btn-tertiary">📤 Export Player List</button>
-    <button id="importBtn" class="btn adv-btn btn-tertiary">📥 Import Player List</button>
+    <button id="dealBtn" class="btn"><span><img src="assets/icons/dice.png" alt="Dice"></span> Roll Openplay</button>
+    <button id="dealIntermediateBtn" class="btn btn-secondary"><span><img src="assets/icons/dice.png" alt="Dice"></span>
+      Roll Intermediate Play</button>
+    <button id="exportBtn" class="btn adv-btn btn-tertiary"><span><img src="assets/icons/inbox.png" alt="Export"></span>
+      Export Player List</button>
+    <button id="importBtn" class="btn adv-btn btn-tertiary"><span><img src="assets/icons/outbox.png"
+          alt="Import"></span> Import Player List</button>
     <input type="file" id="importInput" accept=".csv" style="display: none;" />
-    <button id="resetBtn" class="btn adv-btn danger">🗑️ Reset List</button>
+    <button id="resetBtn" class="btn adv-btn danger"><span><img src="assets/icons/delete.png" alt="Trash"></span> Clear
+      List</button>
   </footer>
 
   <!-- ===== Reset Modal ===== -->

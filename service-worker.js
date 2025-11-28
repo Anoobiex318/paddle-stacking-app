@@ -8,12 +8,24 @@ self.addEventListener("install", (e) => {
         "./style.css",
         "./dashboard.css",
         "./script.js",
-        "./dashboard.js"
-,       "./manifest.json",
+        "./dashboard.js",
+        "./manifest.json",
         "./assets/icons/icon-192.png",
         "./assets/icons/favicon.ico",
         "./assets/icons/logo.png",
-        "./assets/icons/icon-512.png"
+        "./assets/icons/arrows-clockwise.png",
+        "./assets/icons/icon-512.png",
+        "./assets/icons/add.png",
+        "./assets/icons/cogwheel.png",
+        "./assets/icons/dashboard.png",
+        "./assets/icons/delete.png",
+        "./assets/icons/dice.png",
+        "./assets/icons/game.png",
+        "./assets/icons/inbox.png",
+        "./assets/icons/outbox.png",
+        "./assets/icons/pickleball.png",
+        "./assets/icons/remove.png",
+        "./assets/icons/search.png"
       ]);
     })
   );

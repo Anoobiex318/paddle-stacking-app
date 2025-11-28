@@ -54,14 +54,17 @@ function renderDashboard() {
 
     playerCountBox.innerHTML = `
     <div class="playerCount-card total">
-      <h3>Total Players</h3>
+    <span><img src="assets/icons/game.png" alt="Delete"></span>
+      <h3>Total Players </h3>
       <span>${total}</span>
     </div>
     <div class="playerCount-card beginner">
+    <span><img src="assets/icons/game.png" alt="Delete"></span>
       <h3>Beginner</h3>
       <span>${beginners}</span>
     </div>
     <div class="playerCount-card intermediate">
+    <span><img src="assets/icons/game.png" alt="Delete"></span>
       <h3>Intermediate</h3>
       <span>${intermediates}</span>
     </div>

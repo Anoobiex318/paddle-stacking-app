@@ -172,7 +172,7 @@ function renderQueue() {
         <span class="rank-badge ${p.rank.toLowerCase()}">${escapeHtml(p.rank)}</span>
         <span class="play-count">Played: ${p.playCount || 0}</span>
       </div>
-      <button class="remove-btn" onclick="openRemoveModal(${queue.indexOf(p)})" title="Delete or Remove Player">❌</button>
+      <span class="remove-btn" onclick="openRemoveModal(${queue.indexOf(p)})" title="Delete or Remove Player"><img src="assets/icons/remove.png" alt="Delete"></span>
     `;
     playerQueue.appendChild(li);
 
@@ -211,17 +211,34 @@ function renderCourts() {
     const ul = document.querySelector(`#court${index + 1} ul`);
     const finishBtn = document.querySelector(`#court${index + 1} .finish-btn`);
     ul.innerHTML = "";
+
     if (!court || court.length === 0) {
       ul.innerHTML = `<li class="empty-state">Waiting for players</li>`;
       if (finishBtn) finishBtn.style.display = "none";
-      document.getElementById(`court${index + 1}`).classList.remove('active');
+      document.getElementById(`court${index + 1}`).classList.remove("active");
       return;
     }
+
     if (finishBtn) finishBtn.style.display = "inline-block";
-    document.getElementById(`court${index + 1}`).classList.add('active');
+    document.getElementById(`court${index + 1}`).classList.add("active");
+
     court.forEach((p, i) => {
       const li = document.createElement("li");
       li.classList.add("court-players");
+      li.dataset.id = p.id;
+
+      // --- refresh / re-roll button ---
+      const swapBtn = document.createElement("button");
+      swapBtn.className = "player-refresh-btn";
+      swapBtn.title = "Player not available? Click to replace with next in queue.";
+
+      const icon = document.createElement("img");
+      icon.src = "assets/icons/arrows-clockwise.png";   // your icon path
+      icon.className = "refresh-icon";
+
+      swapBtn.appendChild(icon);
+      swapBtn.addEventListener("click", () => replaceCourtPlayer(index, p.id));
+
 
       // player name
       const spanName = document.createElement("span");
@@ -233,21 +250,66 @@ function renderCourts() {
       spanRank.className = `rank-badge ${p.rank.toLowerCase()}`;
       spanRank.textContent = p.rank;
 
+      li.appendChild(swapBtn);
       li.appendChild(spanName);
       li.appendChild(spanRank);
 
-      li.dataset.id = p.id;
       li.style.opacity = "0";
       li.style.transform = "translateY(8px)";
       ul.appendChild(li);
+
       setTimeout(() => {
         li.style.transition = "all 0.32s ease";
         li.style.opacity = "1";
         li.style.transform = "translateY(0)";
       }, 90 * i);
     });
-
   });
+}
+// Replace a player on a court with the next fair player from the queue.
+// - removed player goes back to the FRONT of the queue (priority next time)
+// - playCount is NOT changed (he didn't actually play this game)
+function replaceCourtPlayer(courtIndex, playerId) {
+  const court = courts[courtIndex];
+  if (!court || court.length === 0) return;
+
+  const playerIdx = court.findIndex(p => p.id === playerId);
+  if (playerIdx === -1) return;
+
+  const removedPlayer = court[playerIdx];
+
+  // Find available replacement (not inGame, not the same player)
+  let available = queue.filter(p => !p.inGame && p.id !== playerId);
+
+  if (available.length === 0) {
+    showModal("⚠️ No standby players",
+      "There is no one in the queue to replace this player yet.");
+    return;
+  }
+
+  // Fairness: least games played first, FIFO for ties
+  available.sort((a, b) => (a.playCount || 0) - (b.playCount || 0));
+
+  const replacement = available[0];
+
+  // Put removed player back to the *front* of queue with inGame=false
+  removedPlayer.inGame = false;
+  removedPlayer.lastCourt = null;
+  // playCount stays the same
+  queue.unshift(removedPlayer);
+
+  // Remove chosen replacement from queue
+  const qIdx = queue.findIndex(p => p.id === replacement.id);
+  if (qIdx > -1) queue.splice(qIdx, 1);
+
+  // Put replacement into court (same slot)
+  replacement.inGame = true;
+  replacement.lastCourt = courtIndex;
+  court[playerIdx] = replacement;
+
+  saveState();
+  renderCourts();
+  renderQueue();
 }
 
 /* ---------- Finish Game (adds rotation memory) ---------- */
