@@ -90,11 +90,14 @@ function renderDashboard() {
     /* Detect empty → filled transition */
     if (!wasFilled && isFilled) {
       courtFillAt[idx] = now;
+      // Play match ready sound
+      const audio = new Audio("assets/audio/match-ready.wav");
+      audio.play().catch(e => console.warn("Audio play failed:", e));
     }
 
     const age = now - courtFillAt[idx]; // ms since assignment
 
-    const showPopup = isFilled && age < 1500;     // popup for first 1.5s
+    const showPopup = isFilled && age < 2500;     // popup for first 2.5s
     const showGlow = isFilled && age < 5000;      // glow lasts full 5 seconds
     const showFade = isFilled && age >= 5000 && age < 6000; // fade out between 5–6s
 
