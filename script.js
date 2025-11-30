@@ -16,6 +16,9 @@ const cancelRemove = document.getElementById("cancelRemove");
 const confirmRemove = document.getElementById("confirmRemove");
 const resetBtn = document.getElementById("resetBtn");
 const openAdvanceBtn = document.getElementById("openAdvanceBtn");
+const openAddPlayerBtn = document.getElementById("openAddPlayerBtn");
+const addPlayerModal = document.getElementById("addPlayerModal");
+const cancelAddPlayer = document.getElementById("cancelAddPlayer");
 // control persistence across reloads
 const persistAcrossReloads = true;
 const STORAGE_QUEUE = "pickleballQueue_v3";
@@ -194,6 +197,10 @@ confirmRemove.addEventListener("click", () => {
   if (playerToRemoveIndex !== null) {
     const liEls = document.querySelectorAll("#playerQueue li");
     const li = liEls[playerToRemoveIndex];
+    // Capture name before removal
+    const playerToRemove = queue[playerToRemoveIndex];
+    const playerName = playerToRemove ? playerToRemove.name : "Player";
+
     if (li) li.classList.add("fade-out");
     setTimeout(() => {
       queue.splice(playerToRemoveIndex, 1);
@@ -201,6 +208,7 @@ confirmRemove.addEventListener("click", () => {
       renderQueue();
       removeModal.style.display = "none";
       playerToRemoveIndex = null;
+      showToast(`Player "${playerName}" removed from queue`, 'error');
     }, 300);
   }
 });
@@ -431,10 +439,28 @@ playerForm.addEventListener("submit", (e) => {
   saveState();
   renderQueue();
   playerForm.reset();
+  if (addPlayerModal) addPlayerModal.style.display = "none";
+  showToast(`Player "${newPlayer.name}" added to queue!`);
 });
 document.getElementById("openDashboard").addEventListener("click", () => {
   window.open("dashboard.html", "_blank");
 });
+
+/* ---------- Add Player Modal Logic ---------- */
+if (openAddPlayerBtn) {
+  openAddPlayerBtn.addEventListener("click", () => {
+    addPlayerModal.style.display = "flex";
+    const nameInput = document.getElementById("playerName");
+    if (nameInput) setTimeout(() => nameInput.focus(), 50);
+  });
+}
+
+if (cancelAddPlayer) {
+  cancelAddPlayer.addEventListener("click", () => {
+    addPlayerModal.style.display = "none";
+    playerForm.reset();
+  });
+}
 
 /* ---------- Deal Intermediate Players Only ---------- */
 dealIntermediateBtn.addEventListener("click", () => {
@@ -594,9 +620,30 @@ function init() {
 }
 init();
 document.getElementById("queueSearch").addEventListener("input", renderQueue);
+
 /* ---------- Service Worker registration ---------- */
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("service-worker.js").catch(err => {
     console.warn("SW registration failed:", err);
   });
+}
+
+/* ---------- Toast Notification ---------- */
+function showToast(message, type = 'success') {
+  const container = document.getElementById('toast-container');
+  if (!container) return;
+
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.innerHTML = `
+    <img src="assets/icons/check.png" style="width: 20px; height: 20px;">
+    <span>${message}</span>
+  `;
+
+  container.appendChild(toast);
+
+  // Remove after animation
+  setTimeout(() => {
+    toast.remove();
+  }, 3000);
 }

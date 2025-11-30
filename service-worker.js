@@ -26,6 +26,7 @@ self.addEventListener("install", (e) => {
         "./assets/icons/pickleball.png",
         "./assets/icons/remove.png",
         "./assets/icons/search.png",
+        "./assets/icons/add-group.png",
         "./assets/audio/match-ready.wav"
       ]);
     })

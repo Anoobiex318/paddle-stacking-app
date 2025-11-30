@@ -1,7 +1,7 @@
 # 🏓 Matchpoint Palawan Paddle Stacker
 
 ### **Full Feature List & Changelog**  
-*Last updated: November 01, 2025*
+*Last updated: November 30, 2025*
 
 ---
 
@@ -117,7 +117,7 @@ A modern, lightweight **pickleball court queue and game management system** desi
 | 📡 Firebase Sync | Sync across multiple devices via Firebase | Future |
 | 🏆 Match History | Track who played on which court | Future |
 | 📱 PWA Offline Mode | Installable mobile app | Ready |
-| 🔔 Sound Alerts | Chime when courts become available | Future |
+| 🔔 Sound Alerts | Chime when courts become available | Ready |
 
 ---
 
@@ -132,9 +132,10 @@ A modern, lightweight **pickleball court queue and game management system** desi
 | **v3.5** | Modern UI | Responsive design, modal system |
 | **v4.0** | Dashboard Mode | Real-time synced display |
 | **v4.1** | Responsive Upgrade | TV/tablet grid layout |
+| **v4.2** | Sound Alerts | Chime when courts become available |
 
 ---
 
 **Developed by:** Mark Vill  
 **Technology:** Vanilla JS + Firebase Hosting  
-**Version:** 4.1  
+**Version:** 4.2  
