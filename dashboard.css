@@ -284,12 +284,16 @@
   /* Ensure content stays above the logo */
   .court-header,
   .court-list,
-  .court-players,
   .court-players-name,
   .court-players-rank,
   .rank-badge {
     position: relative;
     z-index: 1;
+  }
+
+  .court-players.court-grid {
+    opacity: 1;
+    color: red;
   }
 
   .court:hover {
@@ -329,16 +333,6 @@
 
   .court-players-name {
     font-weight: 600;
-  }
-
-  .empty-state {
-    text-align: center;
-    color: var(--secondary);
-    font-style: italic;
-    padding: 16px;
-    background: none;
-    border: none;
-    border-radius: 0;
   }
 
   /* Larger court layout for wide screens */

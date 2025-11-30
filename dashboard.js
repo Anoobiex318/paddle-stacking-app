@@ -169,7 +169,7 @@ function renderDashboard() {
       if (isLocked) {
         ul.innerHTML = `<li class="empty-state">Court locked (maintenance / rent)</li>`;
       } else {
-        ul.innerHTML = `<li class="empty-state">Waiting for players</li>`;
+        ul.innerHTML = `<li class="empty-state">Available for playing</li>`;
       }
 
       // Reset court timers if it becomes empty (players left)
