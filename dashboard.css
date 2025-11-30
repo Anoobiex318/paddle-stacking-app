@@ -306,15 +306,14 @@
     font-size: 1.15rem;
   }
 
+
   .court-list {
     flex: 1;
-    list-style: none;
-    margin: 0;
-    padding: 16px;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    gap: 12px;
+    gap: 15px;
+    padding: 12px;
+    list-style: none;
   }
 
   .court-players {
@@ -334,9 +333,12 @@
 
   .empty-state {
     text-align: center;
+    color: var(--secondary);
     font-style: italic;
-    color: #888;
-    font-size: 1rem;
+    padding: 16px;
+    background: none;
+    border: none;
+    border-radius: 0;
   }
 
   /* Larger court layout for wide screens */
@@ -702,4 +704,32 @@
     .playerCount {
       grid-template-columns: 1fr;
     }
+  }
+
+  /* Locked court visual state */
+  .court.locked {
+    border: 2px dashed #bdbdbd;
+    opacity: 0.75;
+    position: relative;
+  }
+
+  .court.locked .court-header {
+    background: #9e9e9e;
+  }
+
+  .court.locked .court-list .court-lock-btn {
+    cursor: not-allowed;
+  }
+
+  .court.locked::before {
+    content: url("assets/icons/padlock.png");
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-weight: 800;
+    font-size: 5.4rem;
+    color: rgba(66, 66, 66, 0.25);
+    letter-spacing: 4px;
+    pointer-events: none;
   }

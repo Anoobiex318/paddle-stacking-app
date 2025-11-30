@@ -59,11 +59,16 @@
       <section id="courts">
         <div class="panel-header">
           <span class="panel-icon"><img src="assets/icons/pickleball.png" alt="Court"></span>
-          <h2>Active Courts</h2>
+          <h2>Court Assignments</h2>
         </div>
         <div class="court-grid">
           <div class="court" id="court1">
-            <div class="court-header">Court #1</div>
+            <div class="court-header">
+              <span>Court #1</span>
+              <button class="court-lock-btn" onclick="toggleCourtLock(0)" title="Lock/Unlock Court">
+                <img src="assets/icons/lock-open.png" alt="Unlock" class="lock-icon">
+              </button>
+            </div>
             <ul class="court-list">
               <p class="empty-state">Waiting for players</p>
             </ul>
@@ -71,7 +76,12 @@
               Game</button>
           </div>
           <div class="court" id="court2">
-            <div class="court-header">Court #2</div>
+            <div class="court-header">
+              <span>Court #2</span>
+              <button class="court-lock-btn" onclick="toggleCourtLock(1)" title="Lock/Unlock Court">
+                <img src="assets/icons/lock-open.png" alt="Unlock" class="lock-icon">
+              </button>
+            </div>
             <ul class="court-list">
               <p class="empty-state">Waiting for players</p>
             </ul>
@@ -79,7 +89,12 @@
               Game</button>
           </div>
           <div class="court" id="court3">
-            <div class="court-header">Court #3</div>
+            <div class="court-header">
+              <span>Court #3</span>
+              <button class="court-lock-btn" onclick="toggleCourtLock(2)" title="Lock/Unlock Court">
+                <img src="assets/icons/lock-open.png" alt="Unlock" class="lock-icon">
+              </button>
+            </div>
             <ul class="court-list">
               <p class="empty-state">Waiting for players</p>
             </ul>
@@ -87,7 +102,12 @@
               Game</button>
           </div>
           <div class="court" id="court4">
-            <div class="court-header">Court #4</div>
+            <div class="court-header">
+              <span>Court #4</span>
+              <button class="court-lock-btn" onclick="toggleCourtLock(3)" title="Lock/Unlock Court">
+                <img src="assets/icons/lock-open.png" alt="Unlock" class="lock-icon">
+              </button>
+            </div>
             <ul class="court-list">
               <p class="empty-state">Waiting for players</p>
             </ul>
@@ -128,7 +148,7 @@
     <div class="modal-content">
       <h3>Add Player</h3>
       <form id="playerForm" style="display: flex; flex-direction: column; gap: 10px;">
-        <input type="text" id="playerName" placeholder="Enter Player's Name" required />
+        <input type="text" id="playerName" placeholder="Enter Player's Name/Nickname" required />
         <select id="playerRank" required>
           <option value="">Select Category</option>
           <option value="Beginner">Beginner</option>

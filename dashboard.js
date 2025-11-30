@@ -3,10 +3,18 @@
 ========================================================== */
 const STORAGE_QUEUE = "pickleballQueue_v3";
 const STORAGE_COURTS = "pickleballCourts_v3";
+const STORAGE_COURT_LOCKS = "pickleballCourtLocks_v1"; // NEW: same key as main app
 
 /* Track when each court becomes filled */
 let courtPrevState = [false, false, false, false];
 let courtFillAt = [0, 0, 0, 0];
+
+/* Small HTML escaper (to be safe) */
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c =>
+    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])
+  );
+}
 
 /* ==========================================================
    MAIN RENDER FUNCTION
@@ -14,6 +22,17 @@ let courtFillAt = [0, 0, 0, 0];
 function renderDashboard() {
   const queue = JSON.parse(localStorage.getItem(STORAGE_QUEUE)) || [];
   const courts = JSON.parse(localStorage.getItem(STORAGE_COURTS)) || [[], [], [], []];
+
+  // NEW: load court locks (default all false)
+  let courtLocks = [false, false, false, false];
+  try {
+    const locks = JSON.parse(localStorage.getItem(STORAGE_COURT_LOCKS));
+    if (Array.isArray(locks) && locks.length === 4) {
+      courtLocks = locks;
+    }
+  } catch (e) {
+    // ignore parse errors, fall back to default
+  }
 
   const queueList = document.getElementById("queueList");
   const courtsContainer = document.getElementById("courtsContainer");
@@ -31,17 +50,20 @@ function renderDashboard() {
       li.innerHTML = `
         <div class="queue-left">
           <span class="queue-number">${i + 1}.</span>
-          <span class="queue-name">${p.name}</span>
+          <span class="queue-name">${escapeHtml(p.name)}</span>
+          <span class="rank-badge ${String(p.rank || "").toLowerCase()}">
+            ${escapeHtml(p.rank || "")}
+          </span>
         </div>
-        <div style="display:flex;align-items:center;">
-          <span class="rank-badge ${p.rank.toLowerCase()}">${p.rank}</span>
-          <!-- <span class="play-count" style="font-size:0.85rem; margin-left:8px; opacity:0.9;">Games: ${p.playCount || 0}</span> -->
+        <div class="queue-right">
+          <span class="play-count">Played: ${p.playCount || 0}</span>
         </div>
       `;
       queueList.appendChild(li);
     });
   }
-  // --- NEW: update category counts box ---
+
+  // --- CATEGORY COUNTS (queue + courts) ---
   const playerCountBox = document.querySelector(".playerCount");
   if (playerCountBox) {
     // Count ALL players (queue + courts)
@@ -52,23 +74,24 @@ function renderDashboard() {
     const beginners = allPlayers.filter(p => p.rank === "Beginner").length;
     const intermediates = allPlayers.filter(p => p.rank === "Intermediate").length;
 
+    // Keep your card-style UI but with dynamic numbers
     playerCountBox.innerHTML = `
-    <div class="playerCount-card total">
-    <span><img src="assets/icons/game.png" alt="Delete"></span>
-      <h3>Total Players </h3>
-      <span>${total}</span>
-    </div>
-    <div class="playerCount-card beginner">
-    <span><img src="assets/icons/game.png" alt="Delete"></span>
-      <h3>Beginner</h3>
-      <span>${beginners}</span>
-    </div>
-    <div class="playerCount-card intermediate">
-    <span><img src="assets/icons/game.png" alt="Delete"></span>
-      <h3>Intermediate</h3>
-      <span>${intermediates}</span>
-    </div>
-  `;
+      <div class="playerCount-card total">
+        <span><img src="assets/icons/game.png" alt="Players"></span>
+        <h3>Total Players</h3>
+        <span>${total}</span>
+      </div>
+      <div class="playerCount-card beginner">
+        <span><img src="assets/icons/game.png" alt="Beginner"></span>
+        <h3>Beginner</h3>
+        <span>${beginners}</span>
+      </div>
+      <div class="playerCount-card intermediate">
+        <span><img src="assets/icons/game.png" alt="Intermediate"></span>
+        <h3>Intermediate</h3>
+        <span>${intermediates}</span>
+      </div>
+    `;
   }
 
   /* ==========================================================
@@ -85,9 +108,16 @@ function renderDashboard() {
     ul.className = "court-list";
 
     const wasFilled = courtPrevState[idx];
-    const isFilled = court.length > 0;
+    const isFilled = court && court.length > 0;
 
-    /* Detect empty → filled transition */
+    const isLocked = courtLocks[idx] === true; // NEW
+
+    // Add a 'locked' class for styling if desired
+    if (isLocked) {
+      card.classList.add("locked");
+    }
+
+    /* Detect empty → filled transition (only matters when not locked & gets players) */
     if (!wasFilled && isFilled) {
       courtFillAt[idx] = now;
       // Play match ready sound
@@ -126,16 +156,25 @@ function renderDashboard() {
       `;
       card.appendChild(banner);
 
-      // remove popup after 1.5s but keep glow
+      // remove popup after 2.5s but keep glow
       setTimeout(() => {
         banner.classList.add("fade-out");
         setTimeout(() => banner.remove(), 500);
       }, 2500);
     }
 
-    /* ---- PLAYER LIST ---- */
+    /* ---- PLAYER LIST / LOCKED STATE ---- */
     if (!isFilled) {
-      ul.innerHTML = `<li class="empty-state">Waiting for players</li>`;
+      // If locked and empty, show locked message
+      if (isLocked) {
+        ul.innerHTML = `<li class="empty-state">Court locked (maintenance / rent)</li>`;
+      } else {
+        ul.innerHTML = `<li class="empty-state">Waiting for players</li>`;
+      }
+
+      // Reset court timers if it becomes empty (players left)
+      courtFillAt[idx] = 0;
+      card.classList.remove("glow", "fade-out-glow", "match-ready-blur");
     } else {
       court.forEach((p) => {
         const li = document.createElement("li");
@@ -145,8 +184,10 @@ function renderDashboard() {
         if (age < 1200) li.classList.add("roulette-in");
 
         li.innerHTML = `
-          <span class="court-players-name">${p.name}</span>
-          <span class="rank-badge ${p.rank.toLowerCase()}">${p.rank}</span>
+          <span class="court-players-name">${escapeHtml(p.name)}</span>
+          <span class="rank-badge ${String(p.rank || "").toLowerCase()}">
+            ${escapeHtml(p.rank || "")}
+          </span>
         `;
         ul.appendChild(li);
       });
@@ -154,12 +195,6 @@ function renderDashboard() {
       // Hide players while popup is showing
       if (showPopup) ul.classList.add("hide-players");
       else ul.classList.remove("hide-players");
-    }
-
-    /* Reset if court becomes empty */
-    if (!isFilled) {
-      courtFillAt[idx] = 0;
-      card.classList.remove("glow", "fade-out-glow", "match-ready-blur");
     }
 
     card.appendChild(ul);
@@ -185,11 +220,17 @@ const dateEl = document.getElementById("currentDate");
 
 function updateClock() {
   const now = new Date();
-  yearEl.textContent = now.getFullYear();
+  if (yearEl) {
+    yearEl.textContent = now.getFullYear();
+  }
 
-  dateEl.textContent = now.toLocaleDateString("en-US", {
-    weekday: "short", month: "short", day: "numeric", year: "numeric"
-  });
+  if (dateEl) {
+    dateEl.textContent = now.toLocaleDateString("en-US", {
+      weekday: "short", month: "short", day: "numeric", year: "numeric"
+    });
+  }
+
+  if (!clockEl) return;
 
   let h = now.getHours();
   const m = now.getMinutes().toString().padStart(2, "0");

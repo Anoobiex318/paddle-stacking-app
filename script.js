@@ -1,4 +1,4 @@
-// script.js — fixed + enhanced version (updated dealing logic)
+// script.js — fixed + enhanced version (updated dealing logic + court locking)
 
 // DOM refs
 const playerForm = document.getElementById("playerForm");
@@ -19,14 +19,17 @@ const openAdvanceBtn = document.getElementById("openAdvanceBtn");
 const openAddPlayerBtn = document.getElementById("openAddPlayerBtn");
 const addPlayerModal = document.getElementById("addPlayerModal");
 const cancelAddPlayer = document.getElementById("cancelAddPlayer");
+
 // control persistence across reloads
 const persistAcrossReloads = true;
 const STORAGE_QUEUE = "pickleballQueue_v3";
 const STORAGE_COURTS = "pickleballCourts_v3";
+const STORAGE_COURT_LOCKS = "pickleballCourtLocks_v1";
 
 // app state
-let queue = [];            // waiting players (only players available to be dealt)
-let courts = [[], [], [], []]; // four courts (players currently playing)
+let queue = [];                  // waiting players
+let courts = [[], [], [], []];   // four courts
+let courtLocks = [false, false, false, false]; // true = locked
 let playerToRemoveIndex = null;
 
 /* ---------- Utilities ---------- */
@@ -42,6 +45,7 @@ function saveState() {
   if (persistAcrossReloads) {
     localStorage.setItem(STORAGE_QUEUE, JSON.stringify(queue));
     localStorage.setItem(STORAGE_COURTS, JSON.stringify(courts));
+    localStorage.setItem(STORAGE_COURT_LOCKS, JSON.stringify(courtLocks));
   }
 }
 
@@ -50,14 +54,18 @@ function loadState() {
   try {
     const q = JSON.parse(localStorage.getItem(STORAGE_QUEUE));
     const c = JSON.parse(localStorage.getItem(STORAGE_COURTS));
+    const locks = JSON.parse(localStorage.getItem(STORAGE_COURT_LOCKS));
+
     if (Array.isArray(q)) queue = q;
     if (Array.isArray(c) && c.length === 4) courts = c;
+    if (Array.isArray(locks) && locks.length === 4) courtLocks = locks;
   } catch (e) { /* ignore */ }
 }
 
 function clearStoredState() {
   localStorage.removeItem(STORAGE_QUEUE);
   localStorage.removeItem(STORAGE_COURTS);
+  localStorage.removeItem(STORAGE_COURT_LOCKS);
 }
 
 function animateListItem(li) {
@@ -108,14 +116,32 @@ function showModal(title, message) {
   reusableModal.style.display = "flex";
 }
 
+/* ---------- Toast Notification ---------- */
+function showToast(message, type = 'success') {
+  const container = document.getElementById('toast-container');
+  if (!container) return;
+
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.innerHTML = `
+    <img src="assets/icons/check.png" style="width: 20px; height: 20px;">
+    <span>${message}</span>
+  `;
+
+  container.appendChild(toast);
+
+  setTimeout(() => {
+    toast.remove();
+  }, 3000);
+}
+
+/* ---------- Queue Rendering ---------- */
 function renderQueue() {
   const searchValue = document.getElementById("queueSearch")?.value?.toLowerCase() || "";
 
-  // --- NEW: update category counts box (static, includes courts) ---
+  // --- category counts (queue + courts) ---
   const playerCountBox = document.querySelector(".playerCount");
   if (playerCountBox) {
-
-    // Merge queue + players in courts into one array
     const allPlayers = [
       ...queue,
       ...courts[0],
@@ -129,17 +155,14 @@ function renderQueue() {
     const intermediates = allPlayers.filter(p => p.rank === "Intermediate").length;
 
     playerCountBox.innerHTML = `
-    <span class="count-pill total">Total Players: ${total}</span>
-    <span class="count-pill beginner">Beginner: ${beginners}</span>
-    <span class="count-pill intermediate">Intermediate: ${intermediates}</span>
-  `;
+      <span class="count-pill total">Total Players: ${total}</span>
+      <span class="count-pill beginner">Beginner: ${beginners}</span>
+      <span class="count-pill intermediate">Intermediate: ${intermediates}</span>
+    `;
   }
-
-  // --- END NEW ---
 
   playerQueue.innerHTML = "";
 
-  // CASE 1: Queue itself is empty (no players at all)
   if (queue.length === 0) {
     playerQueue.innerHTML = `
       <li class="empty-state">
@@ -149,12 +172,10 @@ function renderQueue() {
     return;
   }
 
-  // CASE 2: Queue has players → apply search filter
   const filteredQueue = queue.filter(p =>
     p.name.toLowerCase().includes(searchValue)
   );
 
-  // CASE 3: Search returned empty result
   if (filteredQueue.length === 0) {
     playerQueue.innerHTML = `
       <li class="empty-state no-result">
@@ -164,7 +185,6 @@ function renderQueue() {
     return;
   }
 
-  // CASE 4: Display filtered queue
   filteredQueue.forEach((p, i) => {
     const li = document.createElement("li");
     li.className = "queue-item";
@@ -175,15 +195,16 @@ function renderQueue() {
         <span class="rank-badge ${p.rank.toLowerCase()}">${escapeHtml(p.rank)}</span>
         <span class="play-count">Played: ${p.playCount || 0}</span>
       </div>
-      <span class="remove-btn" onclick="openRemoveModal(${queue.indexOf(p)})" title="Delete or Remove Player"><img src="assets/icons/remove.png" alt="Delete"></span>
+      <span class="remove-btn" onclick="openRemoveModal(${queue.indexOf(p)})" title="Delete or Remove Player">
+        <img src="assets/icons/remove.png" alt="Delete">
+      </span>
     `;
     playerQueue.appendChild(li);
-
     setTimeout(() => animateListItem(li), 70 * i);
   });
 }
 
-
+/* ---------- Remove Modal ---------- */
 window.openRemoveModal = function (index) {
   playerToRemoveIndex = index;
   removeModal.style.display = "flex";
@@ -193,11 +214,11 @@ cancelRemove.addEventListener("click", () => {
   removeModal.style.display = "none";
   playerToRemoveIndex = null;
 });
+
 confirmRemove.addEventListener("click", () => {
   if (playerToRemoveIndex !== null) {
     const liEls = document.querySelectorAll("#playerQueue li");
     const li = liEls[playerToRemoveIndex];
-    // Capture name before removal
     const playerToRemove = queue[playerToRemoveIndex];
     const playerName = playerToRemove ? playerToRemove.name : "Player";
 
@@ -216,37 +237,59 @@ confirmRemove.addEventListener("click", () => {
 /* ---------- Court Rendering & Finish ---------- */
 function renderCourts() {
   courts.forEach((court, index) => {
-    const ul = document.querySelector(`#court${index + 1} ul`);
-    const finishBtn = document.querySelector(`#court${index + 1} .finish-btn`);
+    const courtNumber = index + 1;
+    const courtEl = document.getElementById(`court${courtNumber}`);
+    const ul = courtEl.querySelector("ul");
+    const finishBtn = courtEl.querySelector(".finish-btn");
+    const lockBtn = courtEl.querySelector(".court-lock-btn");
+    const lockIcon = lockBtn?.querySelector(".lock-icon");
+
+    const isLocked = courtLocks[index] === true;
+
+    // Apply locked styling + icon
+    if (isLocked) {
+      courtEl.classList.add("locked");
+      if (lockIcon) lockIcon.src = "assets/icons/lock.png";
+      if (lockIcon) lockIcon.alt = "Locked";
+    } else {
+      courtEl.classList.remove("locked");
+      if (lockIcon) lockIcon.src = "assets/icons/lock-open.png";
+      if (lockIcon) lockIcon.alt = "Unlocked";
+    }
+
     ul.innerHTML = "";
 
     if (!court || court.length === 0) {
-      ul.innerHTML = `<li class="empty-state">Waiting for players</li>`;
+      if (isLocked) {
+        ul.innerHTML = `<li class="empty-state">Court locked (maintenance / rent)</li>`;
+      } else {
+        ul.innerHTML = `<li class="empty-state">Waiting for players</li>`;
+      }
+
       if (finishBtn) finishBtn.style.display = "none";
-      document.getElementById(`court${index + 1}`).classList.remove("active");
+      courtEl.classList.remove("active");
       return;
     }
 
     if (finishBtn) finishBtn.style.display = "inline-block";
-    document.getElementById(`court${index + 1}`).classList.add("active");
+    courtEl.classList.add("active");
 
     court.forEach((p, i) => {
       const li = document.createElement("li");
       li.classList.add("court-players");
       li.dataset.id = p.id;
 
-      // --- refresh / re-roll button ---
+      // refresh / re-roll button
       const swapBtn = document.createElement("button");
       swapBtn.className = "player-refresh-btn";
       swapBtn.title = "Player not available? Click to replace with next in queue.";
 
       const icon = document.createElement("img");
-      icon.src = "assets/icons/arrows-clockwise.png";   // your icon path
+      icon.src = "assets/icons/arrows-clockwise.png";
       icon.className = "refresh-icon";
 
       swapBtn.appendChild(icon);
       swapBtn.addEventListener("click", () => replaceCourtPlayer(index, p.id));
-
 
       // player name
       const spanName = document.createElement("span");
@@ -274,9 +317,8 @@ function renderCourts() {
     });
   });
 }
+
 // Replace a player on a court with the next fair player from the queue.
-// - removed player goes back to the FRONT of the queue (priority next time)
-// - playCount is NOT changed (he didn't actually play this game)
 function replaceCourtPlayer(courtIndex, playerId) {
   const court = courts[courtIndex];
   if (!court || court.length === 0) return;
@@ -286,7 +328,6 @@ function replaceCourtPlayer(courtIndex, playerId) {
 
   const removedPlayer = court[playerIdx];
 
-  // Find available replacement (not inGame, not the same player)
   let available = queue.filter(p => !p.inGame && p.id !== playerId);
 
   if (available.length === 0) {
@@ -295,22 +336,18 @@ function replaceCourtPlayer(courtIndex, playerId) {
     return;
   }
 
-  // Fairness: least games played first, FIFO for ties
   available.sort((a, b) => (a.playCount || 0) - (b.playCount || 0));
 
   const replacement = available[0];
 
-  // Put removed player back to the *front* of queue with inGame=false
+  // removed player goes to FRONT of queue
   removedPlayer.inGame = false;
   removedPlayer.lastCourt = null;
-  // playCount stays the same
   queue.unshift(removedPlayer);
 
-  // Remove chosen replacement from queue
   const qIdx = queue.findIndex(p => p.id === replacement.id);
   if (qIdx > -1) queue.splice(qIdx, 1);
 
-  // Put replacement into court (same slot)
   replacement.inGame = true;
   replacement.lastCourt = courtIndex;
   court[playerIdx] = replacement;
@@ -320,11 +357,28 @@ function replaceCourtPlayer(courtIndex, playerId) {
   renderQueue();
 }
 
+/* ---------- Court Lock Toggle ---------- */
+window.toggleCourtLock = function (index) {
+  courtLocks[index] = !courtLocks[index];
+  const locked = courtLocks[index];
+
+  saveState();
+  renderCourts();
+
+  const courtNum = index + 1;
+  if (locked) {
+    showToast(`Court #${courtNum} locked. It will be skipped when rolling the players.`, "success");
+  } else {
+    showToast(`Court #${courtNum} unlocked and ready for play!`, "success");
+  }
+};
+
 /* ---------- Finish Game (adds rotation memory) ---------- */
 window.finishGame = function (courtNumber) {
   const cIdx = courtNumber - 1;
   const current = courts[cIdx];
   if (!current || current.length === 0) return;
+
   const ul = document.querySelector(`#court${courtNumber} ul`);
   const lis = ul.querySelectorAll("li");
   lis.forEach(li => {
@@ -332,13 +386,13 @@ window.finishGame = function (courtNumber) {
     li.style.transform = "translateY(8px)";
     li.style.opacity = "0";
   });
+
   setTimeout(() => {
-    // record last partners for rotation tracking
     current.forEach(p => {
       p.lastCourt = cIdx;
       p.inGame = false;
       p.played = true;
-      p.playCount = (p.playCount || 0) + 1; // Increment play count
+      p.playCount = (p.playCount || 0) + 1;
       p.lastPartners = current
         .filter(o => o.id !== p.id)
         .map(o => o.id);
@@ -351,18 +405,15 @@ window.finishGame = function (courtNumber) {
   }, 360);
 };
 
-/* ---------- Deal Players (rotation-aware) ---------- */
+/* ---------- Deal Players (rotation-aware + respect locks) ---------- */
 dealBtn.addEventListener("click", () => {
-  const allFull = courts.every(c => c.length >= 4);
-  if (allFull) {
-    return showModal("⚠️ All courts active", "All courts are currently full. Wait for a court to finish before dealing.");
+  const allFullOrLocked = courts.every((c, i) => c.length >= 4 || courtLocks[i]);
+  if (allFullOrLocked) {
+    return showModal("⚠️ No courts available",
+      "All courts are currently full. Wait for a court to finish or unlock one.");
   }
 
-  // 1. Filter available players
   let available = queue.filter(p => !p.inGame);
-
-  // 2. Sort by Play Count (Ascending) -> Then by Queue Order (FIFO)
-  // Since 'queue' is already in FIFO order, a stable sort by playCount preserves FIFO for ties.
   available.sort((a, b) => (a.playCount || 0) - (b.playCount || 0));
 
   if (available.length < 4) {
@@ -370,14 +421,13 @@ dealBtn.addEventListener("click", () => {
   }
 
   let courtsUpdated = false;
-  // Fill empty courts
   for (let i = 0; i < 4; i++) {
+    if (courtLocks[i]) continue; // 🔒 skip locked courts
     if (courts[i].length === 0 && available.length >= 4) {
       const group = available.splice(0, 4);
       group.forEach(p => {
         p.inGame = true;
         p.lastCourt = i;
-        // Remove from main queue
         const qIdx = queue.findIndex(qP => qP.id === p.id);
         if (qIdx > -1) queue.splice(qIdx, 1);
       });
@@ -391,10 +441,49 @@ dealBtn.addEventListener("click", () => {
     renderCourts();
     renderQueue();
   } else {
-    showModal("⚠️ Could not assign", "Not enough players to fill an empty court.");
+    showModal("⚠️ Could not assign", "Not enough players or no available courts.");
   }
 });
 
+/* ---------- Deal Intermediate Players Only (respect locks) ---------- */
+dealIntermediateBtn.addEventListener("click", () => {
+  let intermediateAvailable = queue.filter(p => p.rank === "Intermediate" && !p.inGame);
+  intermediateAvailable.sort((a, b) => (a.playCount || 0) - (b.playCount || 0));
+
+  if (intermediateAvailable.length < 4) {
+    return showModal(
+      "⚠️ Not enough Intermediate players",
+      "At least 4 Intermediate players are required to start a match for this mode."
+    );
+  }
+
+  let courtsUpdated = false;
+  for (let i = 0; i < 4; i++) {
+    if (courtLocks[i]) continue; // 🔒 skip locked
+    if (courts[i].length === 0 && intermediateAvailable.length >= 4) {
+      const group = intermediateAvailable.splice(0, 4);
+      group.forEach(p => {
+        p.inGame = true;
+        p.lastCourt = i;
+        const qIdx = queue.findIndex(qP => qP.id === p.id);
+        if (qIdx > -1) queue.splice(qIdx, 1);
+      });
+      courts[i] = group;
+      courtsUpdated = true;
+    }
+  }
+
+  if (courtsUpdated) {
+    saveState();
+    renderCourts();
+    renderQueue();
+  } else {
+    showModal(
+      "⚠️ Could not assign",
+      "Not enough Intermediate players or no available courts."
+    );
+  }
+});
 
 /* ---------- Reset all data ---------- */
 resetBtn.addEventListener("click", () => resetModal.style.display = "flex");
@@ -402,6 +491,7 @@ cancelReset.addEventListener("click", () => resetModal.style.display = "none");
 confirmReset.addEventListener("click", () => {
   queue = [];
   courts = [[], [], [], []];
+  courtLocks = [false, false, false, false];
   clearStoredState();
   renderCourts();
   renderQueue();
@@ -416,7 +506,6 @@ playerForm.addEventListener("submit", (e) => {
   if (!name || !rank) {
     return showModal("⚠️ Missing info", "Please enter a player name and select a rank.");
   }
-  // Prevent duplicate names (case-insensitive)
   const existsInQueue = queue.some(p => p.name.toLowerCase() === name.toLowerCase());
   const existsInCourts = courts.some(court =>
     court.some(p => p.name.toLowerCase() === name.toLowerCase())
@@ -442,6 +531,7 @@ playerForm.addEventListener("submit", (e) => {
   if (addPlayerModal) addPlayerModal.style.display = "none";
   showToast(`Player "${newPlayer.name}" added to queue!`);
 });
+
 document.getElementById("openDashboard").addEventListener("click", () => {
   window.open("dashboard.html", "_blank");
 });
@@ -462,53 +552,8 @@ if (cancelAddPlayer) {
   });
 }
 
-/* ---------- Deal Intermediate Players Only ---------- */
-dealIntermediateBtn.addEventListener("click", () => {
-  // Filter queue to Intermediate players only (not currently in game)
-  let intermediateAvailable = queue.filter(p => p.rank === "Intermediate" && !p.inGame);
-
-  // Sort by Play Count (Ascending) -> Then by Queue Order (FIFO)
-  intermediateAvailable.sort((a, b) => (a.playCount || 0) - (b.playCount || 0));
-
-  if (intermediateAvailable.length < 4) {
-    return showModal(
-      "⚠️ Not enough Intermediate players",
-      "At least 4 Intermediate players are required to start a match for this mode."
-    );
-  }
-
-  let courtsUpdated = false;
-  // Fill empty courts
-  for (let i = 0; i < 4; i++) {
-    if (courts[i].length === 0 && intermediateAvailable.length >= 4) {
-      const group = intermediateAvailable.splice(0, 4);
-      group.forEach(p => {
-        p.inGame = true;
-        p.lastCourt = i;
-        // Remove from main queue
-        const qIdx = queue.findIndex(qP => qP.id === p.id);
-        if (qIdx > -1) queue.splice(qIdx, 1);
-      });
-      courts[i] = group;
-      courtsUpdated = true;
-    }
-  }
-
-  if (courtsUpdated) {
-    saveState();
-    renderCourts();
-    renderQueue();
-  } else {
-    showModal(
-      "⚠️ Could not assign",
-      "Not enough Intermediate players to fill an empty court."
-    );
-  }
-});
-
 /* ---------- Export to CSV ---------- */
 exportBtn.addEventListener("click", () => {
-  // Gather all players from queue and courts
   const allPlayers = [...queue];
   courts.forEach(court => {
     court.forEach(p => allPlayers.push(p));
@@ -518,16 +563,12 @@ exportBtn.addEventListener("click", () => {
     return showModal("⚠️ No Data", "There are no players to export.");
   }
 
-  // CSV Header
   let csvContent = "Name,Rank,PlayCount\n";
-
-  // CSV Rows
   allPlayers.forEach(p => {
-    const safeName = p.name.replace(/,/g, ""); // simple escape for commas
+    const safeName = p.name.replace(/,/g, "");
     csvContent += `${safeName},${p.rank},${p.playCount || 0}\n`;
   });
 
-  // Create Download Link
   const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
@@ -554,7 +595,6 @@ importInput.addEventListener("change", (e) => {
     const lines = text.split("\n");
     let importedCount = 0;
 
-    // Skip header if present (check if first line contains "Name")
     const startIndex = lines[0].toLowerCase().includes("name") ? 1 : 0;
 
     for (let i = startIndex; i < lines.length; i++) {
@@ -568,10 +608,8 @@ importInput.addEventListener("change", (e) => {
       const rank = parts[1].trim();
       const playCount = parseInt(parts[2] || "0", 10);
 
-      // Validate Rank
       const validRank = ["Beginner", "Intermediate"].includes(rank) ? rank : "Beginner";
 
-      // Check duplicates
       const exists = queue.some(p => p.name.toLowerCase() === name.toLowerCase()) ||
         courts.some(c => c.some(p => p.name.toLowerCase() === name.toLowerCase()));
 
@@ -596,16 +634,18 @@ importInput.addEventListener("change", (e) => {
     } else {
       showModal("⚠️ Import Info", "No new players were added. They might already exist or the file format is incorrect.");
     }
-    importInput.value = ""; // reset
+    importInput.value = "";
   };
   reader.readAsText(file);
 });
+
+/* ---------- Advanced buttons toggle ---------- */
 openAdvanceBtn.addEventListener("click", () => {
   document.querySelectorAll(".adv-btn").forEach(btn => {
-    btn.style.display = btn.style.display === "none" ? "flex" : "none";
+    const current = window.getComputedStyle(btn).display;
+    btn.style.display = (current === "none") ? "flex" : "none";
   });
 });
-
 
 /* ---------- Init ---------- */
 function init() {
@@ -613,12 +653,14 @@ function init() {
   if (!persistAcrossReloads) {
     queue = [];
     courts = [[], [], [], []];
+    courtLocks = [false, false, false, false];
     clearStoredState();
   }
   renderCourts();
   renderQueue();
 }
 init();
+
 document.getElementById("queueSearch").addEventListener("input", renderQueue);
 
 /* ---------- Service Worker registration ---------- */
@@ -626,24 +668,4 @@ if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("service-worker.js").catch(err => {
     console.warn("SW registration failed:", err);
   });
-}
-
-/* ---------- Toast Notification ---------- */
-function showToast(message, type = 'success') {
-  const container = document.getElementById('toast-container');
-  if (!container) return;
-
-  const toast = document.createElement('div');
-  toast.className = `toast ${type}`;
-  toast.innerHTML = `
-    <img src="assets/icons/check.png" style="width: 20px; height: 20px;">
-    <span>${message}</span>
-  `;
-
-  container.appendChild(toast);
-
-  // Remove after animation
-  setTimeout(() => {
-    toast.remove();
-  }, 3000);
 }

@@ -27,6 +27,9 @@ self.addEventListener("install", (e) => {
         "./assets/icons/remove.png",
         "./assets/icons/search.png",
         "./assets/icons/add-group.png",
+        "./assets/icons/lock-open.png",
+        "./assets/icons/lock.png",
+        "./assets/icons/padlock.png",
         "./assets/audio/match-ready.wav"
       ]);
     })

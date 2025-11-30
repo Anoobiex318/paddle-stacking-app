@@ -26,6 +26,8 @@ A modern, lightweight **pickleball court queue and game management system** desi
 - Admin can mark a court’s game as **“Finished”**, returning players to the queue.
 - Courts remain visually active while a game is ongoing.
 - Prevents rolling new players when all courts are full.
+- Prevents courts from being assigned when they are already assigned.
+- Court locking and unlocking feature.
 - Handles **odd player counts** smartly:
   - Prioritizes new players first.
   - Randomly selects a previously played player to fill any gap.
