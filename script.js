@@ -261,7 +261,7 @@ function renderCourts() {
 
     if (!court || court.length === 0) {
       if (isLocked) {
-        ul.innerHTML = `<li class="empty-state">Court locked (maintenance / rent)</li>`;
+        ul.innerHTML = `<li class="empty-state">Court Not Available</li>`;
       } else {
         ul.innerHTML = `<li class="empty-state">Available for playing</li>`;
       }

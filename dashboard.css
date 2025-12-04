@@ -1,4 +1,4 @@
-  main {
+﻿  main {
     flex: 1;
     padding: 1.5rem;
     display: flex;
@@ -218,7 +218,7 @@
     display: flex;
     flex-direction: column;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
-    height: 330px;
+    height: 340px;
     /* Increased height */
   }
 
@@ -261,7 +261,7 @@
   .court::after {
     content: "";
     position: absolute;
-    top: 50%;
+    top: 57%;
     left: 50%;
     transform: translate(-50%, -50%);
     width: 210px;
@@ -274,104 +274,9 @@
     z-index: 0;
   }
 
-  /* When match is newly ready — logo glows and appears full color */
+  /* When match is newly ready â€” logo glows and appears full color */
   .court.emerge::after {
     opacity: 0.65;
-    filter: drop-shadow(0 0 14px rgba(76, 175, 80, 0.6));
-    transform: translate(-50%, -50%) scale(1.25);
-  }
-
-  /* Ensure content stays above the logo */
-  .court-header,
-  .court-list,
-  .court-players-name,
-  .court-players-rank,
-  .rank-badge {
-    position: relative;
-    z-index: 1;
-  }
-
-  .court-players.court-grid {
-    opacity: 1;
-    color: red;
-  }
-
-  .court:hover {
-    transform: scale(1.02);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-  }
-
-  .court-header {
-    background: var(--primary);
-    color: #fff;
-    text-align: center;
-    font-weight: 700;
-    padding: 14px 0;
-    font-size: 1.15rem;
-  }
-
-
-  .court-list {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    padding: 12px;
-    list-style: none;
-  }
-
-  .court-players {
-    background: #f5f5f5;
-    border-left: 5px solid var(--primary);
-    padding: 12px 14px;
-    border-radius: 10px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 1rem;
-  }
-
-  .court-players-name {
-    font-weight: 600;
-  }
-
-  /* Larger court layout for wide screens */
-  @media (min-width: 1600px) {
-    .court-grid {
-      grid-template-columns: repeat(4, 1fr);
-    }
-
-    .court {
-      height: 380px;
-    }
-  }
-
-  /* Stack layout for smaller screens */
-  @media (max-width: 968px) {
-    .court-grid {
-      grid-template-columns: repeat(2, 1fr);
-    }
-  }
-
-  @media (max-width: 600px) {
-    .court-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .court {
-      height: auto;
-    }
-  }
-
-  /* ==========================================================
-   BACKGROUND LOGO (SUBTLE TRANSPARENT BRANDING)
-========================================================== */
-
-  body::after {
-    content: "";
-    position: fixed;
-    left: 12%;
-    transform: translateY(10%);
     width: 1800px;
     /* size of the logo */
     height: 1800px;
@@ -450,7 +355,7 @@
   }
 
 
-  /* Slight stagger — applied dynamically */
+  /* Slight stagger â€” applied dynamically */
   /* ==========================================================
    MATCH READY POP BANNER
 ========================================================== */
@@ -716,9 +621,8 @@
   }
 
   .court.locked::before {
-    content: url("assets/icons/padlock.png");
-    position: absolute;
-    top: 50%;
+    content: url('assets/icons/padlock.png');
+    top: 57%;
     left: 50%;
     transform: translate(-50%, -50%);
     font-weight: 800;
@@ -726,4 +630,213 @@
     color: rgba(66, 66, 66, 0.25);
     letter-spacing: 4px;
     pointer-events: none;
+    border-radius: inherit;
+    z-index: 2;
+  }
+
+  .match-ready-center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.85);
+    text-align: center;
+    font-weight: 900;
+    font-size: 1.35rem;
+    color: #2e7d32;
+    z-index: 50;
+    pointer-events: none;
+    animation: bannerPopIn 0.45s ease-out forwards;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+
+  .match-ready-center img {
+    width: 180px;
+    height: auto;
+    opacity: 0.95;
+    margin-bottom: 12px;
+    animation: emergeLogo 1.8s cubic-bezier(.18, .89, .32, 1.28) forwards;
+  }
+
+  @keyframes emergeLogo {
+    0% {
+      transform: scale(0.45);
+      opacity: 0;
+      filter: blur(10px);
+    }
+
+    50% {
+      transform: scale(1.30);
+      /* was 1.35 */
+      opacity: 1;
+      filter: blur(1px);
+    }
+
+    100% {
+      transform: scale(1.0);
+      /* clean settle */
+      opacity: 1;
+      filter: blur(0);
+    }
+  }
+
+  @keyframes bannerPopIn {
+    0% {
+      transform: translate(-50%, -50%) scale(0.65);
+      opacity: 0;
+    }
+
+    70% {
+      transform: translate(-50%, -50%) scale(1.05);
+      opacity: 1;
+    }
+
+    100% {
+      transform: translate(-50%, -50%) scale(1);
+    }
+  }
+
+  .court.emerge::after {
+    opacity: 0.6;
+    transform: translate(-50%, -50%) scale(1.25);
+    filter: drop-shadow(0 0 18px rgba(76, 175, 80, 0.6));
+    transition: opacity 0.4s ease, transform 0.4s ease;
+  }
+
+  /* Hide players during popup phase */
+  .hide-players {
+    opacity: 0;
+    filter: blur(8px);
+    pointer-events: none;
+    transition: opacity 0.4s ease, filter 0.4s ease;
+  }
+
+  /* Reveal animation */
+  .show-players {
+    opacity: 1;
+    filter: blur(0);
+    transition: opacity 0.4s ease, filter 0.4s ease;
+  }
+
+  /* Player Initial Avatar */
+  .avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #4caf50, #2e7d32);
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: 700;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    flex-shrink: 0;
+  }
+
+  .queue-left,
+  .court-player-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  /* Player Count Stat Cards */
+  .playerCount {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-top: 14px;
+  }
+
+  .playerCount-card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 14px 12px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e0e0e0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .playerCount-card h3 {
+    font-size: 1.75rem;
+    margin-bottom: 6px;
+    font-weight: 700;
+  }
+
+  .playerCount-card span {
+    font-size: 2.0rem;
+    font-weight: 700;
+    color: var(--primary);
+  }
+
+  /* Category colors */
+  .playerCount-card.beginner span {
+    color: #42a5f5;
+  }
+
+  .playerCount-card.intermediate span {
+    color: #ef5350;
+  }
+
+  @media (max-width: 700px) {
+    .playerCount {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* Locked court visual state */
+  .court.locked {
+    border: 2px dashed #bdbdbd;
+    opacity: 0.75;
+    position: relative;
+  }
+
+  .court.locked .court-header {
+    background: #9e9e9e;
+  }
+
+  .court.locked .court-list .court-lock-btn {
+    cursor: not-allowed;
+  }
+
+  /* ==========================================================
+     MOBILE RESPONSIVENESS FOR QUEUE LIST
+  ========================================================== */
+  @media (max-width: 600px) {
+    .queue-item {
+      padding: 10px 12px;
+      min-height: 48px;
+    }
+
+    .queue-name {
+      font-size: 0.9rem;
+      white-space: normal;
+      overflow: visible;
+      text-overflow: clip;
+    }
+
+    .queue-number {
+      padding: 2px 6px;
+      font-size: 0.85rem;
+    }
+
+    .rank-badge {
+      padding: 2px 6px;
+      font-size: 0.7rem;
+    }
+
+    #footer-text {
+      font-size: 0.8rem;
+    }
+
+    .fixed-footer {
+      position: fixed;
+    }
   }

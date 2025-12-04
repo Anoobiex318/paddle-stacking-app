@@ -9,6 +9,12 @@ const STORAGE_COURT_LOCKS = "pickleballCourtLocks_v1"; // NEW: same key as main 
 let courtPrevState = [false, false, false, false];
 let courtFillAt = [0, 0, 0, 0];
 
+/* Queue Auto-Scroll State */
+let lastQueueJson = "";
+let queueScrollPause = 2;
+let queueScrollSpeed = 0.2; // Super slow speed
+let scrollAccumulator = 0; // To handle sub-pixel speeds
+
 /* Small HTML escaper (to be safe) */
 function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, c =>
@@ -37,30 +43,39 @@ function renderDashboard() {
   const queueList = document.getElementById("queueList");
   const courtsContainer = document.getElementById("courtsContainer");
 
-  queueList.innerHTML = "";
+  // queueList.innerHTML = ""; // Handled in conditional block below
   courtsContainer.innerHTML = "";
 
   /* ---- QUEUE DISPLAY ---- */
-  if (queue.length === 0) {
-    queueList.innerHTML = `<div class="empty-state">No players in queue</div>`;
-  } else {
-    queue.forEach((p, i) => {
-      const li = document.createElement("li");
-      li.className = "queue-item";
-      li.innerHTML = `
-        <div class="queue-left">
-          <span class="queue-number">${i + 1}.</span>
-          <span class="queue-name">${escapeHtml(p.name)}</span>
-          <span class="rank-badge ${String(p.rank || "").toLowerCase()}">
-            ${escapeHtml(p.rank || "")}
-          </span>
-        </div>
-        <div class="queue-right">
-          <span class="play-count">Played: ${p.playCount || 0}</span>
-        </div>
-      `;
-      queueList.appendChild(li);
-    });
+  /* ---- QUEUE DISPLAY ---- */
+  const currentQueueJson = JSON.stringify(queue);
+
+  // Only re-render if data changed to preserve scroll position
+  if (currentQueueJson !== lastQueueJson) {
+    lastQueueJson = currentQueueJson;
+    queueList.innerHTML = "";
+
+    if (queue.length === 0) {
+      queueList.innerHTML = `<div class="empty-state">No players in queue</div>`;
+    } else {
+      queue.forEach((p, i) => {
+        const li = document.createElement("li");
+        li.className = "queue-item";
+        li.innerHTML = `
+          <div class="queue-left">
+            <span class="queue-number">${i + 1}.</span>
+            <span class="queue-name">${escapeHtml(p.name)}</span>
+            <span class="rank-badge ${String(p.rank || "").toLowerCase()}">
+              ${escapeHtml(p.rank || "")}
+            </span>
+          </div>
+          <div class="queue-right">
+            <span class="play-count">Played: ${p.playCount || 0}</span>
+          </div>
+        `;
+        queueList.appendChild(li);
+      });
+    }
   }
 
   // --- CATEGORY COUNTS (queue + courts) ---
@@ -167,7 +182,7 @@ function renderDashboard() {
     if (!isFilled) {
       // If locked and empty, show locked message
       if (isLocked) {
-        ul.innerHTML = `<li class="empty-state">Court locked (maintenance / rent)</li>`;
+        ul.innerHTML = `<li class="empty-state">Court Not Available</li>`;
       } else {
         ul.innerHTML = `<li class="empty-state">Available for playing</li>`;
       }
@@ -210,6 +225,53 @@ function renderDashboard() {
 renderDashboard();
 window.addEventListener("storage", renderDashboard);
 setInterval(renderDashboard, 1000);
+
+/* ==========================================================
+   QUEUE AUTO-SCROLL ANIMATION
+========================================================== */
+function animateQueueScroll() {
+  const list = document.getElementById("queueList");
+  if (!list) {
+    requestAnimationFrame(animateQueueScroll);
+    return;
+  }
+
+  // Only scroll if content overflows
+  if (list.scrollHeight > list.clientHeight) {
+    if (queueScrollPause > 0) {
+      queueScrollPause--;
+
+      // If we were paused at the bottom and pause just ended, reset to top
+      if (queueScrollPause <= 0 && list.scrollTop + list.clientHeight >= list.scrollHeight - 1) {
+        list.scrollTop = 0;
+        queueScrollPause = 60; // Pause 1s at top before scrolling again
+      }
+    } else {
+      // Accumulate fractional speed
+      scrollAccumulator += queueScrollSpeed;
+
+      // Only scroll when we have a full pixel
+      if (scrollAccumulator >= 1) {
+        const pixelsToScroll = Math.floor(scrollAccumulator);
+        list.scrollTop += pixelsToScroll;
+        scrollAccumulator -= pixelsToScroll;
+      }
+
+      // Reached bottom?
+      if (list.scrollTop + list.clientHeight >= list.scrollHeight - 1) {
+        queueScrollPause = 120; // Pause ~2s at bottom
+      }
+    }
+  } else {
+    // Reset if no longer overflowing
+    list.scrollTop = 0;
+  }
+
+  requestAnimationFrame(animateQueueScroll);
+}
+
+// Start the animation loop
+requestAnimationFrame(animateQueueScroll);
 
 /* ==========================================================
    LIVE FOOTER CLOCK
