@@ -1174,3 +1174,76 @@ footer .danger:hover {
     width: 100%;
   }
 }
+
+/* ==========================================================
+   MOBILE FOOTER RESPONSIVENESS
+========================================================== */
+@media (max-width: 768px) {
+
+  /* Increase bottom padding so content isn't covered by taller footer */
+  main {
+    padding-bottom: 140px;
+  }
+
+  footer {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 8px;
+    padding: 10px;
+    justify-content: stretch;
+    background: #fff;
+    /* ensure background is solid */
+  }
+
+  /* Undo flex wrapping from desktop */
+  footer .btn {
+    margin: 0;
+    box-shadow: none;
+    border-radius: 8px;
+  }
+
+  /* Row 1: Primary Actions (50% width each) */
+  #dealBtn,
+  #dealIntermediateBtn {
+    grid-column: span 3;
+    width: 100%;
+    padding: 12px 4px;
+    font-size: 0.9rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  /* Row 2: Secondary Actions (33% width each) */
+  #exportBtn,
+  #importBtn,
+  #resetBtn {
+    grid-column: span 2;
+    width: 100%;
+    padding: 8px 2px;
+    font-size: 0.72rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    text-align: center;
+    line-height: 1.1;
+    min-height: 50px;
+  }
+
+  /* Icon adjustments for stacked buttons */
+  #exportBtn img,
+  #importBtn img,
+  #resetBtn img {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+  }
+
+  /* Hide original horizontal icon margin for vertical stack */
+  footer .btn span {
+    display: contents;
+    /* remove span wrapper effect if affecting layout */
+  }
+}
